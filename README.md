@@ -1,17 +1,19 @@
 # phase8-mcp
 
-MCP server for a **Korg Phase 8** acoustic synthesizer. Wraps the MIDI
+MCP server for the **Korg Phase 8** acoustic synthesizer. Wraps the MIDI
 implementation documented in the phase 8 owner's manual v1.00
-(2025-11-20) so an MCP client can trigger resonators, drive per-resonator
-knobs, and modulate globals over USB MIDI.
+(2025-11-20) so a Model Context Protocol client (Claude Code, Cursor,
+Continue, etc.) can trigger resonators, drive per-resonator knobs, and
+modulate globals over USB MIDI.
 
-Part of the [`superclean-collaboration`](../README.md) monorepo — this
-lets Daniel's SC session or Claude Code drive George's Phase 8 during
-livecoded sets at EMS Stockholm.
+Written by Ziforge as part of the `superclean-collaboration` livecoding
+rig at EMS Stockholm. Companion to the other Ziforge MCPs for
+Eurorack + hardware synths — see [Related MCPs](#related-mcps) below.
 
 ## MIDI implementation covered
 
-Direct from section 12.0 of the phase 8 manual:
+Direct from section 12.0 (MIDI Implementation Chart) of the phase 8
+owner's manual:
 
 | Feature | MIDI | Notes |
 |---|---|---|
@@ -47,13 +49,34 @@ Not implemented (Phase 8 doesn't respond to them):
 
 ## Install
 
+From PyPI (once published) or directly from GitHub:
+
 ```bash
+pip install git+https://github.com/Ziforge/phase8-mcp
+```
+
+Or in a checkout:
+
+```bash
+git clone https://github.com/Ziforge/phase8-mcp
 cd phase8-mcp
 pip install -e .
 ```
 
 Auto-connects on startup to any MIDI port whose name contains
-"phase8". Override with `connect_phase8(port_pattern="...", channel=N)`.
+`phase8`. Override with `connect_phase8(port_pattern="...", channel=N)`.
+
+### Wiring it into Claude Code
+
+```json
+{
+  "mcpServers": {
+    "phase8": {
+      "command": "phase8-mcp"
+    }
+  }
+}
+```
 
 ## Example prompts (for the MCP client)
 
@@ -62,6 +85,43 @@ Auto-connects on startup to any MIDI port whose name contains
 - "Change to patch 3, then trigger resonator 1 for 2 seconds"
 - "Enable vibrato mod at depth 90, rate 40"
 
+## Related MCPs
+
+Ziforge maintains several MCP servers for the hardware in the same
+livecoding rig — all follow the same shape (FastMCP + python-rtmidi,
+auto-connect by port-name substring, typed helpers for the top of the
+MIDI chart plus escape hatches for the rest):
+
+| MCP | For |
+|---|---|
+| [`disting-nt-mcp`](https://github.com/Ziforge/disting-nt-mcp) | Expert Sleepers Disting NT |
+| [`fh2-mcp`](https://github.com/Ziforge/fh2-mcp) | Expert Sleepers FH-2 MIDI-to-CV |
+| [`es9-mcp`](https://github.com/Ziforge/es9-mcp) | Expert Sleepers ES-9 audio interface |
+| [`erae-mcp`](https://github.com/Ziforge/erae-mcp) | Embodme ERAE Touch II |
+| [`cirklon-mcp`](https://github.com/Ziforge/cirklon-mcp) | Sequentix Cirklon sequencer |
+| [`elektron-mcp`](https://github.com/Ziforge/elektron-mcp) | fork of zerubeus/elektron-mcp — Digitone, Digitakt, etc. |
+
+## Contributing
+
+Pull requests welcome. Suggested workflow:
+
+1. Fork + branch.
+2. `pip install -e .[dev]` (once dev extras land) or just install the
+   base deps and run against a physical Phase 8 or via a virtual
+   MIDI port for smoke testing.
+3. If you're adding a Korg SysEx opcode or an undocumented CC that
+   the manual doesn't cover, cite the source (community wiki, forum
+   thread, sniffed capture) so future maintainers can reproduce.
+4. Keep the style consistent with the other Ziforge MCPs — one
+   `server.py` with FastMCP tools, a `pyproject.toml`, a README with
+   the MIDI table + tools table.
+
+## Attribution
+
+MIDI implementation chart transcribed from the *phase 8 owner's manual*
+v1.00 (Korg, 2025-11-20), section 12.0. Manual PDF available from
+[Korg's support page for the Phase 8](https://www.korg.com/us/support/download/product/1/945/).
+
 ## License
 
-GPL v2, matching the rest of the monorepo. See [`../LICENSE`](../LICENSE).
+GPL v2. See [`LICENSE`](LICENSE).
